@@ -860,16 +860,16 @@
 
   var arrayProto = Array.prototype;
   var arrayMethods = Object.create(arrayProto);
+  console.log(arrayProto, Object.create(arrayProto), "arrayMethods");
 
   var methodsToPatch = [
-    'push',
-    'pop',
-    'shift',
-    'unshift',
-    'splice',
-    'sort',
-    'reverse'
-  ];
+    "push",
+    "pop",
+    "shift",
+    "unshift",
+    "splice",
+    "sort",
+    "reverse" ];
 
   /**
    * Intercept mutating methods and emit events
@@ -877,7 +877,7 @@
   methodsToPatch.forEach(function (method) {
     // cache original method
     var original = arrayProto[method];
-    def(arrayMethods, method, function mutator () {
+    def(arrayMethods, method, function mutator() {
       var args = [], len = arguments.length;
       while ( len-- ) args[ len ] = arguments[ len ];
 
@@ -885,24 +885,25 @@
       var ob = this.__ob__;
       var inserted;
       switch (method) {
-        case 'push':
-        case 'unshift':
+        case "push":
+        case "unshift":
           inserted = args;
-          break
-        case 'splice':
+          break;
+        case "splice":
           inserted = args.slice(2);
-          break
+          break;
       }
       if (inserted) { ob.observeArray(inserted); }
       // notify change
       ob.dep.notify();
-      return result
+      return result;
     });
   });
 
   /*  */
 
   var arrayKeys = Object.getOwnPropertyNames(arrayMethods);
+  console.log(arrayKeys, "arrayKeys");
 
   /**
    * In some cases we may want to disable observation inside a component's
@@ -910,7 +911,7 @@
    */
   var shouldObserve = true;
 
-  function toggleObserving (value) {
+  function toggleObserving(value) {
     shouldObserve = value;
   }
 
@@ -920,11 +921,11 @@
    * object's property keys into getter/setters that
    * collect dependencies and dispatch updates.
    */
-  var Observer = function Observer (value) {
+  var Observer = function Observer(value) {
     this.value = value;
     this.dep = new Dep();
     this.vmCount = 0;
-    def(value, '__ob__', this);
+    def(value, "__ob__", this);
     if (Array.isArray(value)) {
       if (hasProto) {
         protoAugment(value, arrayMethods);
@@ -964,7 +965,7 @@
    * Augment a target Object or Array by intercepting
    * the prototype chain using __proto__
    */
-  function protoAugment (target, src) {
+  function protoAugment(target, src) {
     /* eslint-disable no-proto */
     target.__proto__ = src;
     /* eslint-enable no-proto */
@@ -975,7 +976,7 @@
    * hidden properties.
    */
   /* istanbul ignore next */
-  function copyAugment (target, src, keys) {
+  function copyAugment(target, src, keys) {
     for (var i = 0, l = keys.length; i < l; i++) {
       var key = keys[i];
       def(target, key, src[key]);
@@ -987,12 +988,12 @@
    * returns the new observer if successfully observed,
    * or the existing observer if the value already has one.
    */
-  function observe (value, asRootData) {
+  function observe(value, asRootData) {
     if (!isObject(value) || value instanceof VNode) {
-      return
+      return;
     }
     var ob;
-    if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+    if (hasOwn(value, "__ob__") && value.__ob__ instanceof Observer) {
       ob = value.__ob__;
     } else if (
       shouldObserve &&
@@ -1006,13 +1007,13 @@
     if (asRootData && ob) {
       ob.vmCount++;
     }
-    return ob
+    return ob;
   }
 
   /**
    * Define a reactive property on an Object.
    */
-  function defineReactive$$1 (
+  function defineReactive$$1(
     obj,
     key,
     val,
@@ -1023,7 +1024,7 @@
 
     var property = Object.getOwnPropertyDescriptor(obj, key);
     if (property && property.configurable === false) {
-      return
+      return;
     }
 
     // cater for pre-defined getter/setters
@@ -1037,7 +1038,7 @@
     Object.defineProperty(obj, key, {
       enumerable: true,
       configurable: true,
-      get: function reactiveGetter () {
+      get: function reactiveGetter() {
         var value = getter ? getter.call(obj) : val;
         if (Dep.target) {
           dep.depend();
@@ -1048,20 +1049,20 @@
             }
           }
         }
-        return value
+        return value;
       },
-      set: function reactiveSetter (newVal) {
+      set: function reactiveSetter(newVal) {
         var value = getter ? getter.call(obj) : val;
         /* eslint-disable no-self-compare */
         if (newVal === value || (newVal !== newVal && value !== value)) {
-          return
+          return;
         }
         /* eslint-enable no-self-compare */
         if (customSetter) {
           customSetter();
         }
         // #7981: for accessor properties without setter
-        if (getter && !setter) { return }
+        if (getter && !setter) { return; }
         if (setter) {
           setter.call(obj, newVal);
         } else {
@@ -1069,7 +1070,7 @@
         }
         childOb = !shallow && observe(newVal);
         dep.notify();
-      }
+      },
     });
   }
 
@@ -1078,63 +1079,69 @@
    * triggers change notification if the property doesn't
    * already exist.
    */
-  function set (target, key, val) {
-    if (isUndef(target) || isPrimitive(target)
+  function set(target, key, val) {
+    if (
+      isUndef(target) || isPrimitive(target)
     ) {
-      warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
+      warn(
+        ("Cannot set reactive property on undefined, null, or primitive value: " + ((target)))
+      );
     }
     if (Array.isArray(target) && isValidArrayIndex(key)) {
       target.length = Math.max(target.length, key);
       target.splice(key, 1, val);
-      return val
+      return val;
     }
     if (key in target && !(key in Object.prototype)) {
       target[key] = val;
-      return val
+      return val;
     }
     var ob = (target).__ob__;
     if (target._isVue || (ob && ob.vmCount)) {
       warn(
-        'Avoid adding reactive properties to a Vue instance or its root $data ' +
-        'at runtime - declare it upfront in the data option.'
-      );
-      return val
+          "Avoid adding reactive properties to a Vue instance or its root $data " +
+            "at runtime - declare it upfront in the data option."
+        );
+      return val;
     }
     if (!ob) {
       target[key] = val;
-      return val
+      return val;
     }
     defineReactive$$1(ob.value, key, val);
     ob.dep.notify();
-    return val
+    return val;
   }
 
   /**
    * Delete a property and trigger change if necessary.
    */
-  function del (target, key) {
-    if (isUndef(target) || isPrimitive(target)
+  function del(target, key) {
+    if (
+      isUndef(target) || isPrimitive(target)
     ) {
-      warn(("Cannot delete reactive property on undefined, null, or primitive value: " + ((target))));
+      warn(
+        ("Cannot delete reactive property on undefined, null, or primitive value: " + ((target)))
+      );
     }
     if (Array.isArray(target) && isValidArrayIndex(key)) {
       target.splice(key, 1);
-      return
+      return;
     }
     var ob = (target).__ob__;
     if (target._isVue || (ob && ob.vmCount)) {
       warn(
-        'Avoid deleting properties on a Vue instance or its root $data ' +
-        '- just set it to null.'
-      );
-      return
+          "Avoid deleting properties on a Vue instance or its root $data " +
+            "- just set it to null."
+        );
+      return;
     }
     if (!hasOwn(target, key)) {
-      return
+      return;
     }
     delete target[key];
     if (!ob) {
-      return
+      return;
     }
     ob.dep.notify();
   }
@@ -1143,7 +1150,7 @@
    * Collect dependencies on array elements when the array is touched, since
    * we cannot intercept array element access like property getters.
    */
-  function dependArray (value) {
+  function dependArray(value) {
     for (var e = (void 0), i = 0, l = value.length; i < l; i++) {
       e = value[i];
       e && e.__ob__ && e.__ob__.dep.depend();
@@ -2163,6 +2170,38 @@
 
   /*  */
 
+  /*
+  事件修饰符正常化
+  运用render函数 事件监听不能使用事件修饰符
+    -------------------------------------
+    修饰符	                      |   前缀
+    passive	                     |    &
+    capture	                     |    !
+    once	                       |    ~
+    capture.once 或 once.capture |    ~!
+    --------------------------------------
+    render(h){
+      let self = this;
+      return h('input',
+      {
+        domProps:
+          {
+            value:self.value
+          }
+        }
+      ),
+      // v-model
+      on: {
+        input(event) {
+          self.$emit('input',event.target.value)
+        },
+        '!click': this.doThisInCapturingMode,
+        '~keyup': this.doThisOnce,
+        '~!mouseover': this.doThisOnceInCapturingMode
+      }
+    }
+  */
+
   var normalizeEvent = cached(function (name) {
     var passive = name.charAt(0) === '&';
     name = passive ? name.slice(1) : name;
@@ -2170,6 +2209,8 @@
     name = once$$1 ? name.slice(1) : name;
     var capture = name.charAt(0) === '!';
     name = capture ? name.slice(1) : name;
+    // name 真实事件
+    // passive once capture 事件修饰符
     return {
       name: name,
       once: once$$1,
@@ -2198,16 +2239,18 @@
   }
 
   function updateListeners (
-    on,
-    oldOn,
-    add,
+    on, // listener
+    oldOn, // oldListener
+    add, 
     remove$$1,
     createOnceHandler,
     vm
   ) {
     var name, def$$1, cur, old, event;
     for (name in on) {
+      // 当前事件
       def$$1 = cur = on[name];
+      // 原来事件
       old = oldOn[name];
       event = normalizeEvent(name);
       if (isUndef(cur)) {
@@ -3774,8 +3817,10 @@
     // 初始化_hasHookEvent
     vm._hasHookEvent = false;
     // init parent attached events
+    // 初始化父级附附加事件
     var listeners = vm.$options._parentListeners;
     if (listeners) {
+      // 更新组件监听
       updateComponentListeners(vm, listeners);
     }
   }
@@ -3805,8 +3850,11 @@
     listeners,
     oldListeners
   ) {
+    // 保存当前vm实例为全局target
     target = vm;
+    // 更新监听
     updateListeners(listeners, oldListeners || {}, add, remove$1, createOnceHandler, vm);
+    // 清除全局target
     target = undefined;
   }
 
@@ -5048,6 +5096,7 @@
       vm._self = vm;
       // 初始化生命周期
       initLifecycle(vm);
+      // 初始化事件
       initEvents(vm);
       initRender(vm);
       callHook(vm, 'beforeCreate');
